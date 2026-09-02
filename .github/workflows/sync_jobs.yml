@@ -1,0 +1,50 @@
+name: Daily Tech Jobs Sync
+
+on:
+  schedule:
+    # Run every 6 hours: midnight, 6am, noon, 6pm UTC
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+    inputs:
+      ats:
+        description: 'Optional: specific ATS to sync (e.g. greenhouse)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run (no DB writes)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run tech jobs ingestion pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ -n "${{ inputs.ats }}" ]; then
+            ARGS="$ARGS --ats ${{ inputs.ats }}"
+          fi
+          python backend/ingest_tech_jobs.py $ARGS

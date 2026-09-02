@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 28" width="140" height="28">
+  <g fill="none">
+    <circle cx="12" cy="14" r="9.5" fill="#008552"/>
+    <path d="M8.5 14L11 16.5L15.5 11.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="28" y="19" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-weight="700" font-size="15" fill="#008552" letter-spacing="-0.02em">greenhouse</text>
+  </g>
+</svg>

@@ -1,0 +1,254 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base Resets ──────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar Styling ───────────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+/* ── Hide scrollbar but keep scrollable ──────────────────── */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Keyframe Animations ─────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatUpDown {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+
+  100% {
+    transform: translateY(-16px) rotate(-1deg);
+  }
+}
+
+@keyframes floatUpDownOpposite {
+  0% {
+    transform: translateY(-12px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(1deg);
+  }
+}
+
+@keyframes planeFloat {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(1.2deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.floating-badge-left {
+  animation: floatUpDown 7s ease-in-out infinite alternate;
+}
+
+.floating-badge-right {
+  animation: floatUpDownOpposite 7s ease-in-out infinite alternate;
+}
+
+.cta-plane-visual svg {
+  animation: planeFloat 5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Interactive Card & Tag Styles ───────────────────────── */
+.popular-tag {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.popular-tag:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.popular-tag.active {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #2563eb !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.12);
+}
+
+.nav-link {
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.nav-link.active {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #2563eb;
+  border-radius: 9999px;
+}
+
+.btn-bookmark {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-bookmark:hover {
+  transform: scale(1.15);
+  color: #2563eb !important;
+}
+
+.btn-bookmark:active {
+  transform: scale(0.92);
+}
+
+.btn-bookmark.active {
+  color: #2563eb !important;
+}
+
+.job-card-item {
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.job-card-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.job-card-item.selected {
+  border: 1.5px solid #2563eb !important;
+  box-shadow: 0 0 0 1px #2563eb !important;
+}
+
+/* ── Hero Background Concentric Ripples ──────────────────── */
+.ripple-1 {
+  width: 480px;
+  height: 480px;
+}
+
+.ripple-2 {
+  width: 760px;
+  height: 760px;
+}
+
+.ripple-3 {
+  width: 1040px;
+  height: 1040px;
+}
+
+/* ── Logo Strip ──────────────────────────────────────────── */
+.company-logos-row .logo-item {
+  flex: 0 0 auto;
+}
+
+.company-logos-row .logo-item img {
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+}

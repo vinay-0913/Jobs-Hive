@@ -1,0 +1,7 @@
+ats-scrapers[scrapers]
+ats-scrapers[parquet]
+supabase
+python-dotenv
+httpx
+pandas
+pyarrow

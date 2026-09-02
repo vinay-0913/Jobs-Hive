@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 32" width="130" height="32">
+  <g fill="none">
+    <rect x="0" y="2" width="28" height="28" rx="14" fill="#FC8019"/>
+    <path d="M14 6.5C10.6 6.5 7.8 9.3 7.8 12.8C7.8 17.2 14 23.5 14 23.5C14 23.5 20.2 17.2 20.2 12.8C20.2 9.3 17.4 6.5 14 6.5ZM14 15.3C12.6 15.3 11.5 14.2 11.5 12.8C11.5 11.4 12.6 10.3 14 10.3C15.4 10.3 16.5 11.4 16.5 12.8C16.5 14.2 15.4 15.3 14 15.3Z" fill="#FFFFFF"/>
+    <text x="36" y="22" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-weight="900" font-size="18" fill="#FC8019" letter-spacing="0.04em">SWIGGY</text>
+  </g>
+</svg>
