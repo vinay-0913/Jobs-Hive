@@ -25,15 +25,17 @@ export function cleanJobTitle(rawTitle) {
 
 // ── Experience Formatting ────────────────────────────────────
 export function formatExperience(job) {
-  if (job.experience) return job.experience;
+  if (typeof job.experience === 'number') {
+    return job.experience === 0 ? "0 Yrs (Fresher)" : `${job.experience}+ Yrs`;
+  }
+  if (job.experience) return `${job.experience} Yrs`;
   const title = (job.title || "").toLowerCase();
   if (title.includes("intern") || title.includes("praktik")) return "0 - 1 Yrs";
   if (title.includes("junior") || title.includes("assoc") || title.includes("entry")) return "0 - 2 Yrs";
-  if (title.includes("senior") || title.includes("sr") || title.includes("lead") || title.includes("manager")) return "4 - 8 Yrs";
+  if (title.includes("senior") || title.includes("sr") || title.includes("lead") || title.includes("manager")) return "5+ Yrs";
   if (title.includes("staff") || title.includes("principal") || title.includes("director")) return "8+ Yrs";
-  if (title.includes("ii") || title.includes("2")) return "2 - 4 Yrs";
-  if (title.includes("iii") || title.includes("3")) return "4 - 6 Yrs";
-  return "1 - 3 Yrs";
+  if (title.includes("ii") || title.includes("2")) return "3 - 5 Yrs";
+  return "Not Specified";
 }
 
 // ── Salary Formatting ────────────────────────────────────────
@@ -60,23 +62,16 @@ export function formatSalaryDisplay(job) {
     }
   }
 
-  const title = (job.title || "").toLowerCase();
-  if (title.includes("director") || title.includes("vp")) return "₹45 – 80 LPA";
-  if (title.includes("principal") || title.includes("staff")) return "₹35 – 60 LPA";
-  if (title.includes("senior") || title.includes("lead")) return "₹22 – 40 LPA";
-  if (title.includes("intern") || title.includes("student")) return "₹4 – 8 LPA";
-  if (title.includes("ii") || title.includes("2")) return "₹16 – 28 LPA";
-  if (title.includes("core")) return "₹18 – 35 LPA";
-  if (title.includes("data") || title.includes("ai") || title.includes("scientist")) return "₹15 – 30 LPA";
-  if (title.includes("backend")) return "₹14 – 26 LPA";
-  if (title.includes("frontend")) return "₹14 – 24 LPA";
-  return "₹12 – 25 LPA";
+  return "Not Specified";
 }
 
 // ── Location Formatting ──────────────────────────────────────
 export function formatLocation(job) {
   if (job.location) {
     let loc = job.location.trim();
+    if (!loc || loc === "nan" || loc === "null") {
+      return job.is_remote ? "Remote" : "Not Provided";
+    }
     const l = loc.toLowerCase();
     if (l.includes("bengaluru") || l.includes("bangalore")) return "Bangalore, India";
     if (l.includes("hyderabad")) return "Hyderabad, India";
@@ -85,12 +80,12 @@ export function formatLocation(job) {
     if (l.includes("noida") || l.includes("delhi")) return "Delhi NCR, India";
     if (l.includes("mumbai")) return "Mumbai, India";
     if (l.includes("chennai")) return "Chennai, India";
-    if (l.includes("remote")) return "Remote (India)";
+    if (l.includes("remote")) return "Remote";
     if (job.is_remote) return "Remote";
     return loc;
   }
   if (job.is_remote) return "Remote";
-  return "Bangalore, India";
+  return "Not Provided";
 }
 
 // ── Skill Tag Extraction ─────────────────────────────────────
@@ -127,19 +122,7 @@ export function extractSkillTags(job) {
   for (const skill of allSkills) {
     if (skill.regex.test(text)) {
       matched.push(skill.name);
-      if (matched.length >= 3) break;
-    }
-  }
-
-  if (matched.length === 0) {
-    if (text.includes("front") || text.includes("ui") || text.includes("web")) {
-      return ["React", "TypeScript", "Tailwind CSS"];
-    } else if (text.includes("data") || text.includes("ai") || text.includes("scientist")) {
-      return ["Python", "Machine Learning", "SQL"];
-    } else if (text.includes("devops") || text.includes("cloud") || text.includes("infra")) {
-      return ["Kubernetes", "AWS", "Docker"];
-    } else {
-      return ["Python", "Java", "System Design"];
+      if (matched.length >= 4) break;
     }
   }
 
@@ -162,7 +145,7 @@ export function formatEmploymentType(type) {
 // ── Bookmark Helpers ─────────────────────────────────────────
 export function isJobSaved(jobId) {
   try {
-    const saved = JSON.parse(localStorage.getItem("easyjobs_saved") || "[]");
+    const saved = JSON.parse(localStorage.getItem("jobshive_saved") || localStorage.getItem("easyjobs_saved") || "[]");
     return saved.includes(jobId.toString());
   } catch {
     return false;
@@ -171,7 +154,7 @@ export function isJobSaved(jobId) {
 
 export function toggleSaveJob(jobId) {
   try {
-    let saved = JSON.parse(localStorage.getItem("easyjobs_saved") || "[]");
+    let saved = JSON.parse(localStorage.getItem("jobshive_saved") || localStorage.getItem("easyjobs_saved") || "[]");
     const strId = jobId.toString();
     const idx = saved.indexOf(strId);
     if (idx >= 0) {
@@ -179,7 +162,7 @@ export function toggleSaveJob(jobId) {
     } else {
       saved.push(strId);
     }
-    localStorage.setItem("easyjobs_saved", JSON.stringify(saved));
+    localStorage.setItem("jobshive_saved", JSON.stringify(saved));
     return idx < 0; // true if now saved
   } catch {
     return false;
@@ -188,7 +171,7 @@ export function toggleSaveJob(jobId) {
 
 export function getSavedCount() {
   try {
-    return JSON.parse(localStorage.getItem("easyjobs_saved") || "[]").length;
+    return JSON.parse(localStorage.getItem("jobshive_saved") || localStorage.getItem("easyjobs_saved") || "[]").length;
   } catch {
     return 0;
   }

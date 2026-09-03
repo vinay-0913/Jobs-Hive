@@ -207,6 +207,82 @@ def filter_recent(df: pd.DataFrame, days: int = MAX_JOB_AGE_DAYS) -> pd.DataFram
     return df[(posted >= cutoff) | posted.isna()]
 
 
+def extract_experience(title: str, description: str = "", raw_val=None) -> int:
+    """Extract required years of experience from raw value, title, and description.
+    
+    Returns:
+        0 for Intern / Fresher / Trainee / 0 Yrs
+        1-2 for Junior / Associate / Entry
+        3-4 for Mid-Level / Level 2 / Level 3
+        5+ for Senior / Lead / Staff / Architect / Management
+    """
+    if raw_val is not None and not pd.isna(raw_val):
+        try:
+            val = int(float(raw_val))
+            if 0 <= val <= 25:
+                return val
+        except (ValueError, TypeError):
+            pass
+
+    t = (title or "").lower()
+
+    # 1. Zero experience / Fresher / Intern / Trainee / 0-2, 0-3, 0-4, 0-5 year ranges
+    if any(k in t for k in ["intern", "internship", "praktik", "trainee", "fresher", "co-op", "apprentice", "student", "0-2", "0-3", "0-4", "0-5", "0 to 2", "0 to 3", "0 to 5"]):
+        return 0
+    if re.search(r'\b0\s*(?:to|-)\s*[1-5]\s*(?:years?|yrs?)\b', t):
+        return 0
+
+    # 2. Executive / Senior Leadership
+    if any(k in t for k in ["director", "vp ", "vice president", "head of", "principal", "fellow", "distinguished"]):
+        return 8
+
+    # 3. Staff / Lead / Architect / Manager
+    if any(k in t for k in ["staff", "lead", "architect", "engineering manager", "tech lead"]):
+        return 6
+
+    # 4. Senior Level
+    if any(k in t for k in ["senior", "sr.", "sr "]):
+        return 5
+
+    # 5. Mid Level
+    if any(k in t for k in [" iii", " 3", "level 3"]):
+        return 4
+    if any(k in t for k in [" ii", " 2", "level 2", "mid-level", "mid level"]):
+        return 3
+
+    # 6. Junior / Entry / Graduate
+    if any(k in t for k in ["junior", "jr.", "entry level", "graduate", "associate"]):
+        return 1
+
+    # 7. Regex check on description text
+    d = (description or "")[:3000].lower()
+    patterns = [
+        # Fresher / 0 years: any range starting with 0 (e.g. 0-2, 0-3, 0-4, 0-5 years), freshers, or no experience
+        (r'(?:no experience|freshers?|0\s*(?:to|-)\s*[1-5]\s*(?:years?|yrs?)|0\+?\s*(?:years?|yrs?))', 0),
+        # Explicit ranges: "3-5 years", "2 to 4 years"
+        (r'(\d{1,2})\+?\s*(?:to|-)\s*\d{1,2}\s*(?:years?|yrs?)(?:\s+of)?\s*(?:relevant|work|industry)?\s*experience', None),
+        # Minimum / At least: "at least 3 years"
+        (r'(?:minimum|at least|over)\s+(\d{1,2})\+?\s*(?:years?|yrs?)', None),
+        # "5+ years of experience"
+        (r'(\d{1,2})\+\s*(?:years?|yrs?)(?:\s+of)?\s*(?:relevant|work|industry)?\s*experience', None),
+        (r'(\d{1,2})\s*(?:years?|yrs?)(?:\s+of)?\s*(?:relevant|work|industry)?\s*experience', None),
+    ]
+
+    for pattern, fixed_val in patterns:
+        m = re.search(pattern, d)
+        if m:
+            if fixed_val is not None:
+                return fixed_val
+            try:
+                yrs = int(m.group(1))
+                if 0 <= yrs <= 20:
+                    return yrs
+            except (ValueError, TypeError, IndexError):
+                pass
+
+    return 2  # Standard developer baseline
+
+
 # ── Transform ────────────────────────────────────────────────
 
 def transform_to_supabase_rows(df: pd.DataFrame) -> list[dict]:
@@ -287,6 +363,7 @@ def transform_to_supabase_rows(df: pd.DataFrame) -> list[dict]:
             "department": safe_str(row.get("department")),
             "team": safe_str(row.get("team")),
             "employment_type": safe_str(row.get("employment_type")),
+            "experience": extract_experience(title, description, row.get("experience")),
             "description": description,
             "posted_at": safe_str(row.get("posted_at")),
             "fetched_at": now,
@@ -425,7 +502,7 @@ def process_ats_slice(
         "country_iso", "is_remote", "salary_min", "salary_max",
         "salary_currency", "salary_period", "salary_summary",
         "employment_type", "department", "team", "description",
-        "posted_at", "apply_url",
+        "posted_at", "apply_url", "experience",
     ]
 
     # Parse

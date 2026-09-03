@@ -104,13 +104,15 @@ export default function JobCard({ job, isSelected, onClick, animationDelay = 0 }
           </div>
 
           {/* Skill Tags */}
-          <div className="flex items-center flex-wrap gap-1.5 mt-2.5">
-            {skills.slice(0, 3).map((skill, i) => (
-              <span key={i} className="bg-slate-100 text-slate-800 text-[11px] font-medium px-2.5 py-1 rounded-md border border-slate-200/60 leading-none">
-                {skill}
-              </span>
-            ))}
-          </div>
+          {skills.length > 0 && (
+            <div className="flex items-center flex-wrap gap-1.5 mt-2.5">
+              {skills.slice(0, 3).map((skill, i) => (
+                <span key={i} className="bg-slate-100 text-slate-800 text-[11px] font-medium px-2.5 py-1 rounded-md border border-slate-200/60 leading-none">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right Side: Bookmark & Time */}

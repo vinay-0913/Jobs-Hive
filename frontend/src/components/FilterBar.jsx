@@ -16,7 +16,9 @@ export default function FilterBar({ totalCount, sortBy, onSortChange, activeFilt
     <div className="flex items-center justify-between py-2.5 px-0.5">
       {/* Total count */}
       <div className="text-[13.5px] text-slate-600 font-medium">
-        <span className="font-bold text-slate-900">{totalCount ? totalCount.toLocaleString() : '36,159'}</span> jobs found
+        <span className="font-bold text-slate-900">
+          {typeof totalCount === 'number' ? totalCount.toLocaleString() : (totalCount || '0')}
+        </span> jobs found
       </div>
 
       {/* Sort & Filter */}
@@ -64,9 +66,11 @@ export default function FilterBar({ totalCount, sortBy, onSortChange, activeFilt
         >
           <SlidersHorizontal size={13} className="text-slate-500" />
           <span>Filters</span>
-          <span className="bg-blue-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center ml-0.5">
-            {activeFilters > 0 ? activeFilters : 1}
-          </span>
+          {activeFilters > 0 && (
+            <span className="bg-blue-600 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center ml-0.5 text-[10px]">
+              {activeFilters}
+            </span>
+          )}
         </button>
       </div>
     </div>

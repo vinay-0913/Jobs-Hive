@@ -29,7 +29,7 @@ export default function ValueProps() {
     <section className="py-14 px-6 bg-white" id="features-section">
       <div className="text-center mb-10">
         <h2 className="text-2xl md:text-[26px] font-bold text-slate-900 tracking-tight">
-          Why tech professionals choose Easy Jobs
+          Why tech professionals choose Jobs Hive
         </h2>
       </div>
 

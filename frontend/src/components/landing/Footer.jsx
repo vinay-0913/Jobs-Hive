@@ -2,11 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const ATS_LOGOS = [
-  { name: 'Greenhouse', src: '/assets/logos/greenhouse.svg', h: 'h-4.5 md:h-5' },
-  { name: 'Lever', src: '/assets/logos/lever.svg', h: 'h-4 md:h-4.5' },
-  { name: 'Ashby', src: '/assets/logos/ashby.svg', h: 'h-4 md:h-4.5' },
-  { name: 'Workday', src: '/assets/logos/workday.svg', h: 'h-4 md:h-4.5' },
-  { name: 'SmartRecruiters', src: '/assets/logos/smartrecruiters.svg', h: 'h-4.5 md:h-5' },
+  { name: 'Greenhouse', src: '/assets/logos/greenhouse.svg', h: 'h-[18px] md:h-[20px]' },
+  { name: 'Lever', src: '/assets/logos/lever.svg', h: 'h-[17px] md:h-[19px]' },
+  { name: 'Ashby', src: '/assets/logos/ashby.svg', h: 'h-[14px] md:h-[16px]' },
+  { name: 'Workday', src: '/assets/logos/workday.svg', h: 'h-[19px] md:h-[21px]' },
+  { name: 'SmartRecruiters', src: '/assets/logos/smartrecruiters.svg', h: 'h-[12px] md:h-[14px]' },
 ];
 
 export default function Footer() {
@@ -20,11 +20,11 @@ export default function Footer() {
           <div className="flex items-center flex-wrap gap-4">
             {ATS_LOGOS.map((ats, idx) => (
               <React.Fragment key={ats.name}>
-                <div className="flex items-center">
-                  <img src={ats.src} alt={ats.name} className={`${ats.h} object-contain`} />
+                <div className="flex items-center justify-center h-7">
+                  <img src={ats.src} alt={ats.name} className={`${ats.h} w-auto object-contain`} />
                 </div>
                 {idx < ATS_LOGOS.length - 1 && (
-                  <span className="text-slate-300 font-semibold text-sm">+</span>
+                  <span className="text-slate-300 font-semibold text-sm select-none">+</span>
                 )}
               </React.Fragment>
             ))}
@@ -54,7 +54,7 @@ export default function Footer() {
                 <line x1="10" y1="13" x2="14" y2="13" />
               </svg>
               <span className="text-lg font-extrabold text-slate-900 tracking-tight">
-                Easy <span className="text-blue-600">Jobs</span>
+                Jobs <span className="text-blue-600">Hive</span>
               </span>
             </Link>
             <p className="text-[13px] leading-relaxed text-slate-500 m-0">
@@ -116,7 +116,7 @@ export default function Footer() {
 
         {/* Bottom Row */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[12.5px] text-slate-500 gap-3.5">
-          <div>© 2026 Easy Jobs. All rights reserved.</div>
+          <div>© 2026 Jobs Hive. All rights reserved.</div>
           <div className="flex items-center gap-4">
             <a
               href="https://twitter.com"

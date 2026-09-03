@@ -5,9 +5,8 @@ import JobCard from '../components/JobCard';
 import JobDetail from '../components/JobDetail';
 import FilterBar from '../components/FilterBar';
 import Pagination from '../components/Pagination';
+import FilterModal from '../components/FilterModal';
 import supabase, { COLUMNS } from '../services/supabaseClient';
-import CURATED_DEFAULT_JOBS from '../data/curatedJobs';
-import { X, Check } from 'lucide-react';
 
 const PAGE_SIZE = 20;
 
@@ -42,118 +41,138 @@ export default function JobsPage() {
   const [sortBy, setSortBy] = useState('relevant');
   const [showFilterModal, setShowFilterModal] = useState(false);
 
+  // URL parameters for all valid filters
   const query = searchParams.get('q') || '';
   const locationFilter = searchParams.get('location') || '';
-  const remoteOnly = searchParams.get('remote') === 'true';
+  const workplaceFilter = searchParams.get('workplace') || (searchParams.get('remote') === 'true' ? 'remote' : '');
+  const empTypeFilter = searchParams.get('emp_type') || '';
+  const experienceFilter = searchParams.get('experience') || '';
+  const datePostedFilter = searchParams.get('date_posted') || '';
 
-  // Fetch jobs from Supabase or fallback
+  // Calculate number of active user filters
+  const activeFilters =
+    (locationFilter ? 1 : 0) +
+    (workplaceFilter ? 1 : 0) +
+    (empTypeFilter ? 1 : 0) +
+    (experienceFilter ? 1 : 0) +
+    (datePostedFilter ? 1 : 0);
+
+  // Fetch real jobs from Supabase database with all active filters
   const fetchJobs = useCallback(async () => {
     setIsLoading(true);
 
-    // Try Supabase first
-    if (supabase) {
-      try {
-        const offset = (page - 1) * PAGE_SIZE;
-        let dbQuery = supabase
-          .from('jobs')
-          .select(COLUMNS, { count: 'exact' })
-          .eq('is_active', true);
+    if (!supabase) {
+      setJobs([]);
+      setTotalCount(0);
+      setIsLoading(false);
+      return;
+    }
 
-        // Search filter
-        if (query) {
-          dbQuery = dbQuery.or(
-            `title.ilike.%${query}%,company_name.ilike.%${query}%,description.ilike.%${query}%`
-          );
-        }
+    try {
+      const offset = (page - 1) * PAGE_SIZE;
+      let dbQuery = supabase
+        .from('jobs')
+        .select(COLUMNS, { count: 'estimated' })
+        .eq('is_active', true);
 
-        // Location filter
-        if (locationFilter) {
-          if (locationFilter === 'Remote') {
-            dbQuery = dbQuery.eq('is_remote', true);
-          } else {
-            dbQuery = dbQuery.ilike('location', `%${locationFilter}%`);
-          }
-        }
+      // 1. Keyword search (Title & Company)
+      if (query.trim()) {
+        const term = query.trim();
+        dbQuery = dbQuery.or(`title.ilike.%${term}%,company_name.ilike.%${term}%`);
+      }
 
-        if (remoteOnly) {
+      // 2. Workplace Filter (Remote vs In-Office/Hybrid)
+      if (workplaceFilter === 'remote') {
+        dbQuery = dbQuery.eq('is_remote', true);
+      } else if (workplaceFilter === 'onsite') {
+        dbQuery = dbQuery.eq('is_remote', false);
+      }
+
+      // 3. Location Filter (City / Region)
+      if (locationFilter) {
+        if (locationFilter.toLowerCase() === 'remote') {
           dbQuery = dbQuery.eq('is_remote', true);
-        }
-
-        // Sort
-        if (sortBy === 'recent') {
-          dbQuery = dbQuery.order('posted_at', { ascending: false, nullsFirst: false });
         } else {
-          dbQuery = dbQuery.order('posted_at', { ascending: false, nullsFirst: false });
+          dbQuery = dbQuery.ilike('location', `%${locationFilter}%`);
         }
-
-        dbQuery = dbQuery.range(offset, offset + PAGE_SIZE - 1);
-
-        const { data, error, count } = await dbQuery;
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          setJobs(data);
-          setTotalCount(count || 36159);
-          if (!selectedJob || page === 1) {
-            setSelectedJob(data[0]);
-          }
-          setIsLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.warn('Supabase fetch error, fallback to curated:', err);
       }
-    }
 
-    // Fallback to curated jobs
-    let filtered = [...CURATED_DEFAULT_JOBS];
-    const term = query.toLowerCase();
+      // 4. Employment Type Filter
+      if (empTypeFilter) {
+        dbQuery = dbQuery.ilike('employment_type', `%${empTypeFilter}%`);
+      }
 
-    if (term) {
-      filtered = filtered.filter(j =>
-        (j.title && j.title.toLowerCase().includes(term)) ||
-        (j.company_name && j.company_name.toLowerCase().includes(term)) ||
-        (j.description && j.description.toLowerCase().includes(term))
-      );
-    }
+      // 5. Experience Filter (Direct Database Column)
+      if (experienceFilter === '0') {
+        dbQuery = dbQuery.eq('experience', 0);
+      } else if (experienceFilter === '1-2' || experienceFilter === '0-2') {
+        dbQuery = dbQuery.gte('experience', 1).lte('experience', 2);
+      } else if (experienceFilter === '3-5') {
+        dbQuery = dbQuery.gte('experience', 3).lte('experience', 5);
+      } else if (experienceFilter === '5+') {
+        dbQuery = dbQuery.gte('experience', 5);
+      }
 
-    if (locationFilter) {
-      if (locationFilter === 'Remote') {
-        filtered = filtered.filter(j => j.is_remote);
+      // 6. Date Posted Filter (Recency)
+      if (datePostedFilter === '24h') {
+        const d = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+        dbQuery = dbQuery.gte('posted_at', d);
+      } else if (datePostedFilter === '7d') {
+        const d = new Date(Date.now() - 7 * 86400 * 1000).toISOString();
+        dbQuery = dbQuery.gte('posted_at', d);
+      } else if (datePostedFilter === '30d') {
+        const d = new Date(Date.now() - 30 * 86400 * 1000).toISOString();
+        dbQuery = dbQuery.gte('posted_at', d);
+      }
+
+      // 7. Sorting
+      if (sortBy === 'salary_high') {
+        dbQuery = dbQuery.order('salary_max', { ascending: false, nullsFirst: false });
       } else {
-        filtered = filtered.filter(j =>
-          j.location && j.location.toLowerCase().includes(locationFilter.toLowerCase())
-        );
+        dbQuery = dbQuery.order('posted_at', { ascending: false, nullsFirst: false });
       }
+
+      // 8. Pagination Range
+      dbQuery = dbQuery.range(offset, offset + PAGE_SIZE - 1);
+
+      const { data, error, count } = await dbQuery;
+
+      if (error) {
+        console.error('Supabase query error:', error);
+        setJobs([]);
+        setTotalCount(0);
+      } else if (data) {
+        setJobs(data);
+        setTotalCount(count != null ? count : data.length);
+        if (!selectedJob || page === 1) {
+          setSelectedJob(data[0] || null);
+        }
+      }
+    } catch (err) {
+      console.error('Database connection error:', err);
+      setJobs([]);
+      setTotalCount(0);
+    } finally {
+      setIsLoading(false);
     }
+  }, [
+    query,
+    locationFilter,
+    workplaceFilter,
+    empTypeFilter,
+    experienceFilter,
+    datePostedFilter,
+    page,
+    sortBy,
+  ]);
 
-    if (remoteOnly) {
-      filtered = filtered.filter(j => j.is_remote);
-    }
-
-    const total = filtered.length > 0 ? (term || locationFilter ? filtered.length : 36159) : 0;
-    setTotalCount(total);
-
-    // Paginate curated jobs
-    const offset = (page - 1) * PAGE_SIZE;
-    const paginated = filtered.slice(offset, offset + PAGE_SIZE);
-
-    setJobs(paginated);
-    if (paginated.length > 0 && (!selectedJob || page === 1)) {
-      setSelectedJob(paginated[0]);
-    }
-    setIsLoading(false);
-  }, [query, locationFilter, remoteOnly, page, sortBy]);
-
-
-  // Reset page when search changes
+  // Reset page to 1 whenever any filter or search query changes
   useEffect(() => {
     setPage(1);
     setSelectedJob(null);
-  }, [query, locationFilter, remoteOnly]);
+  }, [query, locationFilter, workplaceFilter, empTypeFilter, experienceFilter, datePostedFilter]);
 
-  // Fetch on mount and when deps change
+  // Fetch jobs when dependencies change
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
@@ -165,22 +184,51 @@ export default function JobsPage() {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    // Scroll list to top
     const listEl = document.getElementById('jobs-list-scroll');
     if (listEl) listEl.scrollTop = 0;
   };
 
-  const activeFilters = (query ? 1 : 0) + (locationFilter ? 1 : 0) + (remoteOnly ? 1 : 0) || 1;
-
-  const setLocation = (loc) => {
+  // Apply new filters from FilterModal to URL search params
+  const handleApplyFilters = (newFilters) => {
     const newParams = new URLSearchParams(searchParams);
-    if (loc) {
-      newParams.set('location', loc);
+
+    if (newFilters.location) {
+      newParams.set('location', newFilters.location);
     } else {
       newParams.delete('location');
     }
+
+    if (newFilters.workplace) {
+      newParams.set('workplace', newFilters.workplace);
+      if (newFilters.workplace === 'remote') {
+        newParams.set('remote', 'true');
+      } else {
+        newParams.delete('remote');
+      }
+    } else {
+      newParams.delete('workplace');
+      newParams.delete('remote');
+    }
+
+    if (newFilters.empType) {
+      newParams.set('emp_type', newFilters.empType);
+    } else {
+      newParams.delete('emp_type');
+    }
+
+    if (newFilters.experience) {
+      newParams.set('experience', newFilters.experience);
+    } else {
+      newParams.delete('experience');
+    }
+
+    if (newFilters.datePosted) {
+      newParams.set('date_posted', newFilters.datePosted);
+    } else {
+      newParams.delete('date_posted');
+    }
+
     setSearchParams(newParams);
-    setShowFilterModal(false);
   };
 
   return (
@@ -219,11 +267,23 @@ export default function JobsPage() {
                 </svg>
                 <h3 className="text-lg font-bold text-slate-900 mb-1.5">No matching jobs found</h3>
                 <p className="text-sm text-slate-500 max-w-[320px] mx-auto">
-                  {query
-                    ? `We couldn't find any positions matching "${query}". Try broadening your search.`
-                    : 'No active jobs currently available matching your criteria.'
-                  }
+                  {query || activeFilters > 0
+                    ? "We couldn't find any positions matching your criteria. Try adjusting or clearing your filters."
+                    : 'No active jobs currently available matching your criteria.'}
                 </p>
+                {activeFilters > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newParams = new URLSearchParams();
+                      if (query) newParams.set('q', query);
+                      setSearchParams(newParams);
+                    }}
+                    className="mt-4 px-4 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors inline-block"
+                  >
+                    Clear All Filters
+                  </button>
+                )}
               </div>
             ) : (
               jobs.map((job, index) => (
@@ -249,7 +309,6 @@ export default function JobsPage() {
           </div>
         </section>
 
-
         {/* Right Column — Job Detail */}
         <section aria-label="Job details" className="hidden md:flex flex-1 flex-col h-full overflow-hidden">
           <JobDetail job={selectedJob} />
@@ -257,55 +316,18 @@ export default function JobsPage() {
       </main>
 
       {/* Filter Modal */}
-      {showFilterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-fade-in-up">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900">Filter Jobs</h3>
-              <button
-                onClick={() => setShowFilterModal(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="py-4 space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">Location</label>
-                <div className="flex flex-wrap gap-2">
-                  {['All', 'Bangalore', 'Hyderabad', 'Pune', 'Chennai', 'Remote'].map((loc) => {
-                    const isSelected = loc === 'All' ? !locationFilter : locationFilter === loc;
-                    return (
-                      <button
-                        key={loc}
-                        onClick={() => setLocation(loc === 'All' ? '' : loc)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                          isSelected
-                            ? 'bg-blue-600 text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        {loc}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setShowFilterModal(false)}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilterModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        currentFilters={{
+          location: locationFilter,
+          workplace: workplaceFilter,
+          empType: empTypeFilter,
+          experience: experienceFilter,
+          datePosted: datePostedFilter,
+        }}
+        onApply={handleApplyFilters}
+      />
     </div>
   );
 }
-

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { MapPin, Clock, ExternalLink, Heart, Bookmark, CheckCircle2, Star, Briefcase } from 'lucide-react';
+import { MapPin, Clock, ExternalLink, Heart, Bookmark, Briefcase } from 'lucide-react';
 import { CompanyLogo } from './JobCard';
-import { cleanJobTitle, formatLocation, formatExperience, extractSkillTags, timeAgo, isJobSaved, toggleSaveJob, formatEmploymentType } from '../utils/helpers';
+import { cleanJobTitle, formatLocation, formatExperience, extractSkillTags, timeAgo, isJobSaved, toggleSaveJob, formatEmploymentType, formatSalaryDisplay } from '../utils/helpers';
 
-const TABS = ['Job Description', 'About Company', 'Benefits', 'Requirements', 'Skills', 'Reviews'];
+const TABS = ['Job Description', 'Requirements', 'Skills'];
 
 // Custom components for Markdown rendering with darker, high-contrast text
 const MarkdownComponents = {
@@ -104,6 +104,7 @@ export default function JobDetail({ job }) {
   const skills = extractSkillTags(job);
   const time = timeAgo(job.posted_at || job.first_seen_at);
   const empType = formatEmploymentType(job.employment_type);
+  const salary = formatSalaryDisplay(job);
 
   const handleBookmark = () => {
     const nowSaved = toggleSaveJob(job.id);
@@ -114,10 +115,9 @@ export default function JobDetail({ job }) {
   const applyUrl = job.apply_url || job.url || 'https://www.google.com/about/careers/applications/jobs/results';
 
   // Work model
-  const workModel = job.is_remote ? 'Remote' : (job.work_model || 'Hybrid');
+  const workModel = job.is_remote ? 'Remote' : (job.work_model || 'In-Office / On-site');
   const role = job.role || 'Individual Contributor';
-  const team = job.team || job.department || 'Core Engineering';
-  const fullLoc = job.full_location || (location.includes('Bangalore') ? 'Bangalore, Karnataka, India' : (location.includes('Hyderabad') ? 'Hyderabad, Telangana, India' : location));
+  const team = job.team || job.department || 'Engineering';
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 lg:p-7 shadow-xs flex flex-col h-full overflow-hidden animate-fade-in-up">
@@ -133,9 +133,6 @@ export default function JobDetail({ job }) {
                 <h1 className="text-[21px] lg:text-[23px] font-bold text-slate-900 tracking-tight leading-tight">
                   {title}
                 </h1>
-                <span className="inline-flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#e6f4ea] text-[#137333] leading-none">
-                  New
-                </span>
                 {job.is_remote && (
                   <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 leading-none">
                     <MapPin size={11} />
@@ -243,74 +240,18 @@ export default function JobDetail({ job }) {
               </div>
             )}
 
-            {activeTab === 'About Company' && (
-              <div className="space-y-4">
-                <h3 className="text-[16px] font-bold text-slate-900">About {job.company_name}</h3>
-                <p className="text-[14px] text-slate-800 leading-relaxed">
-                  {job.company_name} is a world-class technology company shaping the future of global digital products, infrastructure, and engineering innovation. With thousands of passionate engineers and creatives worldwide, {job.company_name} values innovation, continuous learning, and scalable architecture.
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <div className="text-xs text-slate-500 font-medium">Industry</div>
-                    <div className="text-sm font-bold text-slate-900 mt-0.5">Software & Internet</div>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <div className="text-xs text-slate-500 font-medium">Company Size</div>
-                    <div className="text-sm font-bold text-slate-900 mt-0.5">10,000+ Employees</div>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <div className="text-xs text-slate-500 font-medium">Primary Office</div>
-                    <div className="text-sm font-bold text-slate-900 mt-0.5">{location}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'Benefits' && (
-              <div className="space-y-4">
-                <h3 className="text-[16px] font-bold text-slate-900">Perks & Benefits at {job.company_name}</h3>
-                <div className="grid sm:grid-cols-2 gap-3.5">
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
-                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">Comprehensive Health & Wellness</h4>
-                      <p className="text-xs text-slate-600 mt-1">Full medical, dental, and vision insurance for employees and dependents.</p>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
-                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">Flexible Work Arrangements</h4>
-                      <p className="text-xs text-slate-600 mt-1">Hybrid and remote options with generous home-office stipends.</p>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
-                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">Learning & Development</h4>
-                      <p className="text-xs text-slate-600 mt-1">Annual budget for books, certifications, conferences, and courses.</p>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
-                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">Retirement & Equity</h4>
-                      <p className="text-xs text-slate-600 mt-1">Generous ESOP / RSU stock grants and matching retirement plans.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {activeTab === 'Requirements' && (
               <div className="space-y-4">
                 <h3 className="text-[16px] font-bold text-slate-900">Key Requirements</h3>
-                <ul className="space-y-2.5 pl-4 list-disc marker:text-blue-600 text-[14px] text-slate-800">
-                  <li>Bachelor’s or Master’s degree in Computer Science, Engineering, or related technical field.</li>
-                  <li>{experience} of hands-on experience in software engineering and distributed architectures.</li>
-                  <li>Proficiency in core tech stack: {skills.join(', ')}.</li>
-                  <li>Strong problem-solving abilities and solid understanding of data structures and algorithms.</li>
-                  <li>Experience collaborating with cross-functional product and engineering teams.</li>
+                <ul className="space-y-3 pl-4 list-disc marker:text-blue-600 text-[14px] text-slate-800">
+                  <li><strong className="text-slate-900">Experience Required:</strong> {experience}</li>
+                  <li><strong className="text-slate-900">Employment Type:</strong> {empType}</li>
+                  <li><strong className="text-slate-900">Workplace Model:</strong> {workModel} ({location})</li>
+                  <li><strong className="text-slate-900">Salary Range:</strong> {salary}</li>
+                  {skills.length > 0 && (
+                    <li><strong className="text-slate-900">Key Tech Stack / Skills:</strong> {skills.join(', ')}</li>
+                  )}
+                  <li>For specific qualifications and daily responsibilities, please review the full <strong>Job Description</strong> tab.</li>
                 </ul>
               </div>
             )}
@@ -318,53 +259,17 @@ export default function JobDetail({ job }) {
             {activeTab === 'Skills' && (
               <div className="space-y-4">
                 <h3 className="text-[16px] font-bold text-slate-900">Required Skills & Tech Stack</h3>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {skills.map((skill, i) => (
-                    <span key={i} className="bg-slate-100 text-slate-900 font-semibold text-xs px-3 py-1.5 rounded-lg border border-slate-200">
-                      {skill}
-                    </span>
-                  ))}
-                  <span className="bg-slate-100 text-slate-900 font-semibold text-xs px-3 py-1.5 rounded-lg border border-slate-200">
-                    Git & CI/CD
-                  </span>
-                  <span className="bg-slate-100 text-slate-900 font-semibold text-xs px-3 py-1.5 rounded-lg border border-slate-200">
-                    Agile / Scrum
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'Reviews' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="text-3xl font-extrabold text-slate-900">4.5</div>
-                  <div className="flex text-amber-400">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} size={18} fill="currentColor" />
+                {skills.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {skills.map((skill, i) => (
+                      <span key={i} className="bg-slate-100 text-slate-900 font-semibold text-xs px-3 py-1.5 rounded-lg border border-slate-200">
+                        {skill}
+                      </span>
                     ))}
                   </div>
-                  <span className="text-sm text-slate-600">Based on 1,200+ employee reviews</span>
-                </div>
-                <div className="space-y-2 pt-2">
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
-                      <span>Work-Life Balance</span>
-                      <span className="text-emerald-600 font-bold">4.4 / 5</span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
-                      <span>Culture & Values</span>
-                      <span className="text-emerald-600 font-bold">4.7 / 5</span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
-                      <span>Compensation & Benefits</span>
-                      <span className="text-emerald-600 font-bold">4.6 / 5</span>
-                    </div>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-sm text-slate-500">Skills are outlined in the full job description.</p>
+                )}
               </div>
             )}
           </div>
@@ -378,6 +283,11 @@ export default function JobDetail({ job }) {
                 <div>
                   <div className="text-[12px] font-semibold text-slate-500 mb-0.5">Role</div>
                   <div className="text-[13.5px] font-bold text-slate-900">{role}</div>
+                </div>
+
+                <div>
+                  <div className="text-[12px] font-semibold text-slate-500 mb-0.5">Salary</div>
+                  <div className="text-[13.5px] font-bold text-slate-900">{salary}</div>
                 </div>
 
                 <div>
@@ -397,7 +307,7 @@ export default function JobDetail({ job }) {
 
                 <div>
                   <div className="text-[12px] font-semibold text-slate-500 mb-0.5">Location</div>
-                  <div className="text-[13.5px] font-bold text-slate-900">{fullLoc}</div>
+                  <div className="text-[13.5px] font-bold text-slate-900">{location}</div>
                 </div>
               </div>
             </div>

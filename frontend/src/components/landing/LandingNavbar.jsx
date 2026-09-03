@@ -12,9 +12,9 @@ export default function LandingNavbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 select-none" id="nav-brand-logo">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-extrabold text-lg shadow-[0_2px_6px_rgba(37,99,235,0.35)]">
-            E
+            J
           </div>
-          <span className="text-[19px] font-bold text-slate-900 tracking-tight">Easy Jobs</span>
+          <span className="text-[19px] font-bold text-slate-900 tracking-tight">Jobs Hive</span>
         </Link>
 
         {/* Center Navigation Links */}

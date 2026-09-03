@@ -38,9 +38,9 @@ export default function Header({ onSearch }) {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 select-none shrink-0 group">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-extrabold text-[17px] shadow-[0_2px_6px_rgba(37,99,235,0.35)] group-hover:scale-105 transition-transform">
-            E
+            J
           </div>
-          <span className="text-[19px] font-bold text-slate-900 tracking-tight">Easy Jobs</span>
+          <span className="text-[19px] font-bold text-slate-900 tracking-tight">Jobs Hive</span>
         </Link>
 
         {/* Center Search */}
