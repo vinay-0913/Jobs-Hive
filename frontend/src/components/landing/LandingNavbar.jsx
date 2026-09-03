@@ -25,12 +25,7 @@ export default function LandingNavbar() {
           >
             Find Jobs
           </Link>
-          <a
-            href="#companies-section"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 py-1.5 flex items-center gap-1 transition-colors"
-          >
-            Companies
-          </a>
+
           <a
             href="#salary-insights"
             className="text-sm font-medium text-slate-600 hover:text-slate-900 py-1.5 flex items-center gap-1 transition-colors"
@@ -44,36 +39,7 @@ export default function LandingNavbar() {
             Remote Jobs
           </Link>
 
-          {/* Resources Dropdown */}
-          <div className="relative group">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 py-1.5 flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <span>Resources</span>
-              <ChevronDown size={13} className="transition-transform duration-200 group-hover:rotate-180" />
-            </button>
-            <div className="absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.08)] p-1.5 min-w-[190px] opacity-0 invisible translate-y-1.5 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
-              <a
-                href="#ats-guide"
-                className="block px-3 py-2 text-[13px] font-medium text-slate-700 rounded-lg hover:bg-slate-50 hover:text-blue-600 transition-colors"
-              >
-                ATS Scrapers Guide
-              </a>
-              <a
-                href="#career-advice"
-                className="block px-3 py-2 text-[13px] font-medium text-slate-700 rounded-lg hover:bg-slate-50 hover:text-blue-600 transition-colors"
-              >
-                Career Playbook
-              </a>
-              <a
-                href="#resume-tips"
-                className="block px-3 py-2 text-[13px] font-medium text-slate-700 rounded-lg hover:bg-slate-50 hover:text-blue-600 transition-colors"
-              >
-                Tech Resume Builder
-              </a>
-            </div>
-          </div>
+
         </nav>
 
         {/* Right Header Actions */}

@@ -14,7 +14,7 @@ export default function StatsBanner() {
 
         <div className="text-center flex-1">
           <div className="text-3xl sm:text-[32px] font-extrabold text-blue-600 leading-tight mb-1 tracking-tight">
-            30+
+            100+
           </div>
           <div className="text-[13px] font-medium text-slate-500">Top Companies</div>
         </div>
@@ -28,7 +28,7 @@ export default function StatsBanner() {
 
         <div className="text-center flex-1">
           <div className="text-3xl sm:text-[32px] font-extrabold text-blue-600 leading-tight mb-1 tracking-tight">
-            1M+
+            1000+
           </div>
           <div className="text-[13px] font-medium text-slate-500">Job Seekers</div>
         </div>
