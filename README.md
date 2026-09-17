@@ -13,6 +13,8 @@
 
 ---
 
+### Live - https://jobshive.in/
+
 ## 📑 Table of Contents
 
 - [🌟 Key Features](#-key-features)
@@ -103,54 +105,6 @@ flowchart TD
     end
 ```
 
----
-
-## 📁 Repository Structure
-
-```text
-.
-├── .github/
-│   └── workflows/
-│       └── sync_jobs.yml         # Scheduled GitHub Actions workflow (runs every 6h)
-├── ats-scrapers/                 # Modular ATS scraping engine and parsers
-│   ├── src/ats_scrapers/         # ATS adapters (greenhouse, ashby, lever, workday, etc.)
-│   └── pyproject.toml            # Scraper library configuration
-├── backend/
-│   ├── schema.sql                # Supabase PostgreSQL schema, indexes, RLS, & search RPC
-│   ├── seed_companies.py         # Curated list of top tech companies for initial seed
-│   ├── ingest_tech_jobs.py       # Main ingestion, role classification & cleanup script
-│   ├── sync_engine.py            # Multi-source company sync engine
-│   └── requirements.txt          # Python dependencies (supabase, httpx, pandas, etc.)
-├── frontend/
-│   ├── public/
-│   │   ├── _redirects            # Cloudflare Pages SPA rewrite rule (/* /index.html 200)
-│   │   └── assets/logos/         # Brand and company SVGs
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── landing/          # LandingNavbar, HeroSection, TrustedCompanies, etc.
-│   │   │   ├── Header.jsx        # App navigation & instant search input
-│   │   │   ├── FilterBar.jsx     # Filter pills and mobile filter trigger
-│   │   │   ├── FilterModal.jsx   # Multi-facet filter modal for mobile & desktop
-│   │   │   ├── JobCard.jsx       # Responsive job listing card
-│   │   │   ├── JobDetail.jsx     # Side-drawer job details and direct apply modal
-│   │   │   └── Pagination.jsx    # Page navigation controls
-│   │   ├── pages/
-│   │   │   ├── LandingPage.jsx   # High-converting landing page (Route: /)
-│   │   │   └── JobsPage.jsx      # Job discovery engine (Route: /jobs)
-│   │   ├── services/
-│   │   │   └── supabaseClient.js # Supabase client singleton & query definitions
-│   │   ├── data/
-│   │   │   ├── curatedJobs.js    # Curated fallback data for offline resilience
-│   │   │   └── brandLogos.jsx    # SVG icons for companies and platforms
-│   │   ├── App.jsx               # React Router configuration
-│   │   ├── main.jsx              # React DOM entry point
-│   │   └── index.css             # Tailwind styling and typography
-│   ├── package.json              # Frontend dependencies and scripts
-│   ├── tailwind.config.js        # Tailwind CSS theme extension
-│   └── vite.config.js            # Vite build configuration (Port 3000)
-├── AGENTS.md                     # Workspace guidelines & rules
-└── README.md                     # Project documentation
-```
 
 ---
 
